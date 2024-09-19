@@ -1,3 +1,6 @@
+#thomas
+#19/9/2024
+
 import time
 import os, random
 from hashlib import sha256
