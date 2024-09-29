@@ -1,10 +1,10 @@
 ##hello
-#Thomas 
+#Thomas Keay
 #This is the Cube Generation of the Rubik Cube Program
 #changed 29/9/2024
 import tkinter as tk
 
-# Define the colors
+#Colours
 WHITE = 'W'
 RED = 'R'
 BLUE = 'B'
@@ -12,7 +12,7 @@ GREEN = 'G'
 ORANGE = 'O'
 YELLOW = 'Y'
 
-# Initialize the cube faces
+#Cube faces
 faces = {
     'U': [[WHITE] * 3 for _ in range(3)],  # Up
     'L': [[RED] * 3 for _ in range(3)],    # Left
@@ -22,7 +22,7 @@ faces = {
     'D': [[YELLOW] * 3 for _ in range(3)]  # Down
 }
 
-# Define the color mapping for tkinter
+#Colour for tkinter
 color_map = {
     'W': 'white',
     'R': 'red',
@@ -32,7 +32,7 @@ color_map = {
     'Y': 'yellow'
 }
 
-# Initialize selection
+
 selected_face = 'F'
 selected_row = 0
 selected_col = 0
@@ -47,22 +47,19 @@ def draw_face(canvas, face, start_x, start_y, highlight=None):
                 canvas.create_rectangle(start_x + j*30, start_y + i*30, start_x + (j+1)*30, start_y + (i+1)*30, fill=color)
 
 def rotate_face(face):
-    # Rotate the face 90 degrees clockwise
+    #90 degrees clockwise
     return [list(reversed(col)) for col in zip(*face)]
 
 def rotate_cube(cube, move):
     if move == 'U':
         cube['U'] = rotate_face(cube['U'])
-        # Update adjacent faces
         cube['F'][0], cube['R'][0], cube['B'][0], cube['L'][0] = \
             cube['R'][0], cube['B'][0], cube['L'][0], cube['F'][0]
     elif move == 'D':
         cube['D'] = rotate_face(cube['D'])
-        # Update adjacent faces
         cube['F'][2], cube['R'][2], cube['B'][2], cube['L'][2] = \
             cube['L'][2], cube['F'][2], cube['R'][2], cube['B'][2]
-    # Add more moves for 'L', 'R', 'F', 'B'
-    # ...
+ 
 
 def draw_cube():
     root = tk.Tk()
@@ -107,7 +104,7 @@ def draw_cube():
     root.bind('<Right>', move_selection)
     root.bind('<space>', lambda event: select_next_face())
 
-    update_cube()  # Initial draw
+    update_cube()  #New draw
 
     root.mainloop()
 
