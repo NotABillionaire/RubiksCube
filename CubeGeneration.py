@@ -1,5 +1,5 @@
-##hello
-#Thomas Keay
+#hello
+#Thomas 
 #This is the Cube Generation of the Rubik Cube Program
 #changed 29/9/2024
 import tkinter as tk
@@ -22,7 +22,7 @@ faces = {
     'D': [[YELLOW] * 3 for _ in range(3)]  # Down
 }
 
-#Colour for tkinter
+#Color for tkinter
 color_map = {
     'W': 'white',
     'R': 'red',
@@ -113,4 +113,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
