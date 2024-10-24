@@ -1,10 +1,11 @@
 #hello
-#Thomas 
+#Thomas
 #This is the Cube Generation of the Rubik Cube Program
 #changed 29/9/2024
 import tkinter as tk
+import random
 
-#Colours
+# Colours
 WHITE = 'W'
 RED = 'R'
 BLUE = 'B'
@@ -12,7 +13,7 @@ GREEN = 'G'
 ORANGE = 'O'
 YELLOW = 'Y'
 
-#Cube faces
+# Cube faces
 faces = {
     'U': [[WHITE] * 3 for _ in range(3)],  # Up
     'L': [[RED] * 3 for _ in range(3)],    # Left
@@ -22,7 +23,7 @@ faces = {
     'D': [[YELLOW] * 3 for _ in range(3)]  # Down
 }
 
-#Color for tkinter
+# Color mapping for tkinter
 color_map = {
     'W': 'white',
     'R': 'red',
@@ -31,7 +32,6 @@ color_map = {
     'O': 'orange',
     'Y': 'yellow'
 }
-
 
 selected_face = 'F'
 selected_row = 0
@@ -42,12 +42,16 @@ def draw_face(canvas, face, start_x, start_y, highlight=None):
         for j in range(3):
             color = color_map[face[i][j]]
             if highlight and (i, j) == highlight:
-                canvas.create_rectangle(start_x + j*30, start_y + i*30, start_x + (j+1)*30, start_y + (i+1)*30, fill=color, outline='Pink', width=3)
+                canvas.create_rectangle(start_x + j * 30, start_y + i * 30,
+                                        start_x + (j + 1) * 30, start_y + (i + 1) * 30,
+                                        fill=color, outline='Pink', width=3)
             else:
-                canvas.create_rectangle(start_x + j*30, start_y + i*30, start_x + (j+1)*30, start_y + (i+1)*30, fill=color)
+                canvas.create_rectangle(start_x + j * 30, start_y + i * 30,
+                                        start_x + (j + 1) * 30, start_y + (i + 1) * 30,
+                                        fill=color)
 
 def rotate_face(face):
-    #90 degrees clockwise
+    # 90 degrees clockwise
     return [list(reversed(col)) for col in zip(*face)]
 
 def rotate_cube(cube, move):
@@ -59,25 +63,36 @@ def rotate_cube(cube, move):
         cube['D'] = rotate_face(cube['D'])
         cube['F'][2], cube['R'][2], cube['B'][2], cube['L'][2] = \
             cube['L'][2], cube['F'][2], cube['R'][2], cube['B'][2]
- 
+
+def shuffle_cube():
+    moves = ['U', 'D', 'L', 'R', 'F', 'B']
+    for _ in range(20):  # Perform 20 random moves
+        move = random.choice(moves)
+        rotate_cube(faces, move)
+    update_cube()
+
+def update_cube(move=None):
+    if move:
+        rotate_cube(faces, move)
+    canvas.delete("all")
+    draw_face(canvas, faces['U'], 150, 20, highlight=(selected_row, selected_col) if selected_face == 'U' else None)  # Up
+    draw_face(canvas, faces['L'], 20, 100, highlight=(selected_row, selected_col) if selected_face == 'L' else None)  # Left
+    draw_face(canvas, faces['F'], 150, 100, highlight=(selected_row, selected_col) if selected_face == 'F' else None) # Front
+    draw_face(canvas, faces['R'], 280, 100, highlight=(selected_row, selected_col) if selected_face == 'R' else None) # Right
+    draw_face(canvas, faces['B'], 410, 100, highlight=(selected_row, selected_col) if selected_face == 'B' else None) # Back
+    draw_face(canvas, faces['D'], 150, 180, highlight=(selected_row, selected_col) if selected_face == 'D' else None) # Down
 
 def draw_cube():
+    global canvas  # Make canvas accessible in other areas
     root = tk.Tk()
     root.title("Rubik's Cube")
 
     canvas = tk.Canvas(root, width=400, height=300)
     canvas.pack()
 
-    def update_cube(move=None):
-        if move:
-            rotate_cube(faces, move)
-        canvas.delete("all")
-        draw_face(canvas, faces['U'], 150, 20, highlight=(selected_row, selected_col) if selected_face == 'U' else None)  # Up
-        draw_face(canvas, faces['L'], 20, 100, highlight=(selected_row, selected_col) if selected_face == 'L' else None)  # Left
-        draw_face(canvas, faces['F'], 150, 100, highlight=(selected_row, selected_col) if selected_face == 'F' else None) # Front
-        draw_face(canvas, faces['R'], 280, 100, highlight=(selected_row, selected_col) if selected_face == 'R' else None) # Right
-        draw_face(canvas, faces['B'], 410, 100, highlight=(selected_row, selected_col) if selected_face == 'B' else None) # Back
-        draw_face(canvas, faces['D'], 150, 180, highlight=(selected_row, selected_col) if selected_face == 'D' else None) # Down
+    # Button to shuffle the cube
+    shuffle_button = tk.Button(root, text="Shuffle", command=shuffle_cube)
+    shuffle_button.pack()
 
     def select_next_face():
         global selected_face
@@ -104,8 +119,7 @@ def draw_cube():
     root.bind('<Right>', move_selection)
     root.bind('<space>', lambda event: select_next_face())
 
-    update_cube()  #New draw
-
+    update_cube()  # New draw
     root.mainloop()
 
 def main():
@@ -113,5 +127,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
