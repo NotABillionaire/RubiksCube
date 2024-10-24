@@ -1,5 +1,5 @@
 #hello
-#Thomas
+#Thomas 
 #This is the Cube Generation of the Rubik Cube Program
 #changed 29/9/2024
 import tkinter as tk
@@ -57,12 +57,36 @@ def rotate_face(face):
 def rotate_cube(cube, move):
     if move == 'U':
         cube['U'] = rotate_face(cube['U'])
+        # Rotate the top layer edges
         cube['F'][0], cube['R'][0], cube['B'][0], cube['L'][0] = \
-            cube['R'][0], cube['B'][0], cube['L'][0], cube['F'][0]
+            cube['L'][0], cube['F'][0], cube['R'][0], cube['B'][0]
     elif move == 'D':
         cube['D'] = rotate_face(cube['D'])
-        cube['F'][2], cube['R'][2], cube['B'][2], cube['L'][2] = \
-            cube['L'][2], cube['F'][2], cube['R'][2], cube['B'][2]
+        # Rotate the bottom layer edges
+        cube['F'][2], cube['L'][2], cube['B'][2], cube['R'][2] = \
+            cube['R'][2], cube['F'][2], cube['L'][2], cube['B'][2]
+    elif move == 'L':
+        cube['L'] = rotate_face(cube['L'])
+        # Rotate the left layer edges
+        for i in range(3):
+            cube['U'][i][0], cube['F'][i][0], cube['D'][i][0], cube['B'][2-i][2] = \
+                cube['F'][i][0], cube['D'][i][0], cube['B'][2-i][2], cube['U'][i][0]
+    elif move == 'R':
+        cube['R'] = rotate_face(cube['R'])
+        # Rotate the right layer edges
+        for i in range(3):
+            cube['U'][i][2], cube['B'][i][0], cube['D'][i][2], cube['F'][i][2] = \
+                cube['B'][i][0], cube['D'][i][2], cube['F'][i][2], cube['U'][i][2]
+    elif move == 'F':
+        cube['F'] = rotate_face(cube['F'])
+        # Rotate the front layer edges
+        cube['U'][2], cube['L'][2], cube['D'][0], cube['R'][0] = \
+            cube['L'][2], cube['D'][0], cube['R'][0], cube['U'][2]
+    elif move == 'B':
+        cube['B'] = rotate_face(cube['B'])
+        # Rotate the back layer edges
+        cube['U'][0], cube['R'][2], cube['D'][2], cube['L'][0] = \
+            cube['R'][2], cube['D'][2], cube['L'][0], cube['U'][0]
 
 def shuffle_cube():
     moves = ['U', 'D', 'L', 'R', 'F', 'B']
@@ -87,7 +111,7 @@ def draw_cube():
     root = tk.Tk()
     root.title("Rubik's Cube")
 
-    canvas = tk.Canvas(root, width=400, height=300)
+    canvas = tk.Canvas(root, width=600, height=300)  # Increased width for better view
     canvas.pack()
 
     # Button to shuffle the cube
@@ -119,7 +143,7 @@ def draw_cube():
     root.bind('<Right>', move_selection)
     root.bind('<space>', lambda event: select_next_face())
 
-    update_cube()  # New draw
+    update_cube()  # Initial draw
     root.mainloop()
 
 def main():
@@ -127,6 +151,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
