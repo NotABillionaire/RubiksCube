@@ -44,7 +44,7 @@ def draw_face(canvas, face, start_x, start_y, highlight=None):
             if highlight and (i, j) == highlight:
                 canvas.create_rectangle(start_x + j * 30, start_y + i * 30,
                                         start_x + (j + 1) * 30, start_y + (i + 1) * 30,
-                                        fill=color, outline='Pink', width=3)
+                                        fill=color, outline='gray', width=5)
             else:
                 canvas.create_rectangle(start_x + j * 30, start_y + i * 30,
                                         start_x + (j + 1) * 30, start_y + (i + 1) * 30,
