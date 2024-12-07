@@ -10,7 +10,7 @@ import linecache
 
 
 
-# This will add the new file you created for generation
+# This will add the new file 
 import Cube_Generation
 
 file = "user.txt"
