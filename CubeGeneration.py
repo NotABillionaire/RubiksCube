@@ -4,7 +4,7 @@
 #changed 29/9/2024
 
 import pygame
-from pygame.locals import *
+from pygame.locals import * # this should install all
 from OpenGL.GL import *
 from OpenGL.GLU import *
 
