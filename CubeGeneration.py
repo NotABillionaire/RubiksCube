@@ -3,8 +3,9 @@
 #This is the Cube Generation of the Rubik Cube Program
 #changed 29/9/2024
 
+import Config
 import pygame
-from pygame.locals import * # this should install all
+from pygame.locals import *
 from OpenGL.GL import *
 from OpenGL.GLU import *
 
@@ -62,6 +63,7 @@ def draw_cube():
         for vertex in edge:
             glVertex3fv(vertices[vertex])
     glEnd()
+    draw_grid()
 
 def main():
     pygame.init()
@@ -75,11 +77,27 @@ def main():
     #Main loop
     running = True
     rotation_x, rotation_y = 0, 0
+    mouse_down = False
+
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
 
+            #Physical mouse button 
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_down = True
+            if event.type == pygame.MOUSEBUTTONUP:
+                mouse_down = False
+
+            #Physical mouse movement
+
+            if event.type == pygame.MOUSEMOTION and mouse_down:
+                dx, dy = event.rel
+                rotation_x += dy * Config.sensitivity  #Use to change the rotation sensitivity
+                rotation_y += dx * Config.sensitivity
+
+            #Physical keyboard input
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT:
                     rotation_y -= 5
@@ -92,7 +110,7 @@ def main():
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
-        #rotation
+        #Rotation
         glPushMatrix()
         glRotatef(rotation_x, 1, 0, 0)
         glRotatef(rotation_y, 0, 1, 0)
@@ -105,7 +123,41 @@ def main():
 
     pygame.quit()
 
+
 if __name__ == "__main__":
     main()
 
+
+
+
+
+
+def draw_grid():
+    glColor3f(0, 0, 0)  #Black lines
+    for face in surfaces:
+        v0, v1, v2, v3 = [vertices[i] for i in face]
+        
+        #Draw two horizontal lines
+        for i in range(1, 3):
+            factor = i / 3
+            glBegin(GL_LINES)
+            glVertex3f(v0[0] * (1 - factor) + v1[0] * factor,
+                       v0[1] * (1 - factor) + v1[1] * factor,
+                       v0[2] * (1 - factor) + v1[2] * factor)
+            glVertex3f(v3[0] * (1 - factor) + v2[0] * factor,
+                       v3[1] * (1 - factor) + v2[1] * factor,
+                       v3[2] * (1 - factor) + v2[2] * factor)
+            glEnd()
+
+         #Draw two vertical lines
+        for i in range(1, 3):
+            factor = i / 3
+            glBegin(GL_LINES)
+            glVertex3f(v0[0] * (1 - factor) + v3[0] * factor,
+                       v0[1] * (1 - factor) + v3[1] * factor,
+                       v0[2] * (1 - factor) + v3[2] * factor)
+            glVertex3f(v1[0] * (1 - factor) + v2[0] * factor,
+                       v1[1] * (1 - factor) + v2[1] * factor,
+                       v1[2] * (1 - factor) + v2[2] * factor)
+            glEnd()
 
