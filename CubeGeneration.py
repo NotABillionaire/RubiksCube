@@ -1,5 +1,5 @@
 #hello
-#Thomas Keay
+#Thomas
 #This is the Cube Generation of the Rubik Cube Program
 #changed 29/9/2024
 
