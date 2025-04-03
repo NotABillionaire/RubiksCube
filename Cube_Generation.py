@@ -1,6 +1,6 @@
 # Thomas
-# Cube Generation of the Rubik's Cube Program – Updated to simulate a real 3D Rubik's Cube.
-# Last updated: 29/9/2024
+# Please Please Please
+# Last updated: 03/04/2025
 
 import Config
 import pygame
