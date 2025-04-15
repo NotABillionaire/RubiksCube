@@ -1,5 +1,5 @@
 # Thomas
-# Cube Generation of the Rubik's Cube Program – Updated to simulate a real 3D Rubik's Cube.
+# Cube Generation
 # Last updated: 29/9/2024
 
 import Config
