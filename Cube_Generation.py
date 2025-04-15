@@ -1,21 +1,35 @@
 # Thomas
-# Please Please Please
-# Last updated: 03/04/2025
+# Cube Generation of the Rubik's Cube Program – Updated to simulate a real 3D Rubik's Cube.
+# Last updated: 29/9/2024
 
 import Config
 import pygame
 from pygame.locals import *
+from OpenGL.GL import *
+from OpenGL.GLU import *
 import numpy as np
 import math
 
 def draw_unit_cube(colors):
+
     vertices = [
-        [1, 1, -1], [1, -1, -1], [-1, -1, -1], [-1, 1, -1], 
-        [1, 1, 1], [1, -1, 1], [-1, -1, 1], [-1, 1, 1]
+        [1, 1, -1],    # 0
+        [1, -1, -1],   # 1
+        [-1, -1, -1],  # 2
+        [-1, 1, -1],   # 3
+        [1, 1, 1],     # 4
+        [1, -1, 1],    # 5
+        [-1, -1, 1],   # 6
+        [-1, 1, 1]     # 7
     ]
+    # Define faces 
     surfaces = [
-        (0, 1, 2, 3), (4, 5, 6, 7), (0, 4, 7, 3), 
-        (1, 5, 6, 2), (3, 2, 6, 7), (0, 1, 5, 4)
+        (0, 1, 2, 3),  # Back
+        (4, 5, 6, 7),  # Front
+        (0, 4, 7, 3),  # Left
+        (1, 5, 6, 2),  # Right
+        (3, 2, 6, 7),  # Top
+        (0, 1, 5, 4)   # Bottom
     ]
     glBegin(GL_QUADS)
     for i, face in enumerate(surfaces):
@@ -31,8 +45,10 @@ def draw_unit_cube(colors):
             glVertex3fv(vertices[vertex])
     glEnd()
 
+
 class Cubie:
     def __init__(self, position, colors):
+      
         self.position = np.array(position, dtype=np.float32)
         self.colors = colors
 
@@ -42,25 +58,34 @@ class Cubie:
         draw_unit_cube(self.colors)
         glPopMatrix()
 
+
 class RubiksCube:
     def __init__(self):
+    
         self.cubies = []
+        # Solved state
         default_colors = {
-            'F': (1, 0, 0), 'B': (1, 0.5, 0), 'L': (0, 1, 0),
-            'R': (0, 0, 1), 'U': (1, 1, 1), 'D': (1, 1, 0)
+            'F': (1, 0, 0),
+            'B': (1, 0.5, 0),
+            'L': (0, 1, 0),
+            'R': (0, 0, 1),
+            'U': (1, 1, 1),
+            'D': (1, 1, 0)
         }
+        # centre cords 
         positions = [-2, 0, 2]
         for x in positions:
             for y in positions:
                 for z in positions:
-                    colors = [
-                        default_colors['B'] if z == -2 else (0.5, 0.5, 0.5),
-                        default_colors['F'] if z == 2 else (0.5, 0.5, 0.5),
-                        default_colors['L'] if x == -2 else (0.5, 0.5, 0.5),
-                        default_colors['R'] if x == 2 else (0.5, 0.5, 0.5),
-                        default_colors['U'] if y == 2 else (0.5, 0.5, 0.5),
-                        default_colors['D'] if y == -2 else (0.5, 0.5, 0.5)
-                    ]
+                    # if the cubie is on the exterior use the appropriate color.
+                    # Otherwise use gray for hidden faces.
+                    colors = []
+                    colors.append(default_colors['B'] if z == -2 else (0.5, 0.5, 0.5))  # Back
+                    colors.append(default_colors['F'] if z == 2 else (0.5, 0.5, 0.5))   # Front
+                    colors.append(default_colors['L'] if x == -2 else (0.5, 0.5, 0.5))  # Left
+                    colors.append(default_colors['R'] if x == 2 else (0.5, 0.5, 0.5))   # Right
+                    colors.append(default_colors['U'] if y == 2 else (0.5, 0.5, 0.5))   # Up
+                    colors.append(default_colors['D'] if y == -2 else (0.5, 0.5, 0.5))  # Down
                     self.cubies.append(Cubie((x, y, z), colors))
 
     def draw(self):
@@ -68,43 +93,46 @@ class RubiksCube:
             cubie.draw()
 
     def rotate_face(self, face, angle):
-        tol = 0.1
-        if face == 'F':
+    
+        tol = 0.1  # Tolerance for floating point 
+        if face == 'F':  # Front face
             axis = (0, 0, 1)
             for cubie in self.cubies:
                 if abs(cubie.position[2] - 2) < tol:
                     cubie.position = rotate_vector(cubie.position, axis, angle)
-        elif face == 'B':
+        elif face == 'B':  # Back 
             axis = (0, 0, 1)
             for cubie in self.cubies:
                 if abs(cubie.position[2] + 2) < tol:
                     cubie.position = rotate_vector(cubie.position, axis, -angle)
-        elif face == 'L':
+        elif face == 'L':  # Left 
             axis = (1, 0, 0)
             for cubie in self.cubies:
                 if abs(cubie.position[0] + 2) < tol:
                     cubie.position = rotate_vector(cubie.position, axis, angle)
-        elif face == 'R':
+        elif face == 'R':  # Right 
             axis = (1, 0, 0)
             for cubie in self.cubies:
                 if abs(cubie.position[0] - 2) < tol:
                     cubie.position = rotate_vector(cubie.position, axis, -angle)
-        elif face == 'U':
+        elif face == 'U':  # Up 
             axis = (0, 1, 0)
             for cubie in self.cubies:
                 if abs(cubie.position[1] - 2) < tol:
                     cubie.position = rotate_vector(cubie.position, axis, angle)
-        elif face == 'D':
+        elif face == 'D':  # Down 
             axis = (0, 1, 0)
             for cubie in self.cubies:
                 if abs(cubie.position[1] + 2) < tol:
                     cubie.position = rotate_vector(cubie.position, axis, -angle)
 
 def rotate_vector(vec, axis, angle):
+  
     angle_rad = math.radians(angle)
     cos_a = math.cos(angle_rad)
     sin_a = math.sin(angle_rad)
     ax, ay, az = axis
+    # Normalize axis
     norm = math.sqrt(ax*ax + ay*ay + az*az)
     ax, ay, az = ax/norm, ay/norm, az/norm
     x, y, z = vec
@@ -130,15 +158,19 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_down = True
             if event.type == pygame.MOUSEBUTTONUP:
                 mouse_down = False
+
             if event.type == pygame.MOUSEMOTION and mouse_down:
                 dx, dy = event.rel
                 rotation_x += dy * Config.sensitivity
                 rotation_y += dx * Config.sensitivity
+
             if event.type == pygame.KEYDOWN:
+                # Use keys F, B, L, R, U, D to rotate faces clockwise.
                 if event.key == pygame.K_f:
                     cube.rotate_face('F', 90)
                 if event.key == pygame.K_b:
@@ -165,3 +197,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
