@@ -50,16 +50,6 @@ surfaces = [
     (0, 4, 5, 1)   #bottom
 ]
 
-
-# --- THE COORDINATE SYSTEM ---
-# We create a list to store the X, Y, Z and Rotation for every cube.
-# Format: [x, y, z, rot_y, rot_x, rot_z]
-cube_system = []
-for x in range(-1, 2):
-    for y in range(-1, 2):
-        for z in range(-1, 2):
-            cube_system.append([x, y, z, 0, 0, 0])
-
 def draw_cube(bottom_rotation, top_rotation, middle_rotation, bottom_side_rotation, middle_side_rotation,top_side_rotation):
     #Distance between cubes 
     spacing = 2.1 
@@ -184,6 +174,7 @@ def main():
                 if event.key == pygame.K_KP9:
                     top_rotation += 45              #change this to change the movement speed
 
+
                 if event.key == pygame.K_KP7:
                     top_rotation -= 45              #change this to change the movement speed
                     
@@ -210,9 +201,6 @@ def main():
 
                 if event.key == pygame.K_KP2:
                     middle_side_rotation += 45      #change this to change the movement speed
-
-
-
                     
 
 
