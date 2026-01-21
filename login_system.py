@@ -1,5 +1,5 @@
 #Thomas 
-#Login System
+#Login Systempy
 #changed 29/9/2024
 
 import Config #Imports my global variables
@@ -92,9 +92,17 @@ def login1():
         if psn_hashed in hashed_line:  #Uses the User_id to get the line number
             print("Password found")
             print("Hello", user2, "welcome to your account")
-            #Game code here
             Config.sensitivity = float(input("please enter your preferred sensitivity (0 - 0.5)"))
-            Cube_Generation.main()
+            
+            #instuctions for using the cube 
+
+            print("\n Please use the number pad to use this program to solve the cube \n below are the keybind:\n")
+            print("rotate top    of the cube in the x direction / horintally : 7 --- 9")
+            print("rotate middle of the cube in the x direction / horintally : 4  --- 6")
+            print("rotate bottom of the cube in the x direction / horintally : 1 --- 3")
+
+
+            Cube_Generation.main()   
         else:
             print("Password not found")
             start()

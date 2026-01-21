@@ -1,195 +1,232 @@
-# Thomas
-# Cube Generation
-# Last updated: 15/4/2025
+#py -m pip uninstall package_name
+
+#hello
+#Thomas
+#This is the Cube Generation of the Rubik Cube Program
+#changed 2/01/2025
 
 import Config
 import pygame
 from pygame.locals import *
 from OpenGL.GL import *
 from OpenGL.GLU import *
-import numpy as np
-import math
 
-def draw_unit_cube(colors):
+#cube colors for each face
+cube_colors = [
+    (1, 0, 0),  #red
+    (0, 1, 0),  #green
+    (0, 0, 1),  #blue
+    (1, 1, 0),  #yellow
+    (1, 0.5, 0),  #orange
+    (1, 1, 1)   #white
+]
 
-    vertices = [
-        [1, 1, -1],    # 0
-        [1, -1, -1],   # 1
-        [-1, -1, -1],  # 2
-        [-1, 1, -1],   # 3
-        [1, 1, 1],     # 4
-        [1, -1, 1],    # 5
-        [-1, -1, 1],   # 6
-        [-1, 1, 1]     # 7
-    ]
-    # Define faces 
-    surfaces = [
-        (0, 1, 2, 3),  # Back
-        (4, 5, 6, 7),  # Front
-        (0, 4, 7, 3),  # Left
-        (1, 5, 6, 2),  # Right
-        (3, 2, 6, 7),  # Top
-        (0, 1, 5, 4)   # Bottom
-    ]
-    glBegin(GL_QUADS)
-    for i, face in enumerate(surfaces):
-        glColor3fv(colors[i])
-        for vertex in face:
-            glVertex3fv(vertices[vertex])
-    glEnd()
-    glLineWidth(2)
-    glBegin(GL_LINES)
-    glColor3f(0, 0, 0)
-    for edge in [(0,1),(1,2),(2,3),(3,0),(4,5),(5,6),(6,7),(7,4),(0,4),(1,5),(2,6),(3,7)]:
-        for vertex in edge:
-            glVertex3fv(vertices[vertex])
-    glEnd()
+#vertices of the cube
+vertices = [
+    [1, 1, -1],  #0
+    [1, -1, -1], #1
+    [-1, -1, -1], #2
+    [-1, 1, -1], #3
+    [1, 1, 1],   #4
+    [1, -1, 1],  #5
+    [-1, -1, 1], #6
+    [-1, 1, 1]   #7
+]
 
+#edges for wireframe
+edges = [
+    (0, 1), (1, 2), (2, 3), (3, 0),
+    (4, 5), (5, 6), (6, 7), (7, 4),
+    (0, 4), (1, 5), (2, 6), (3, 7)
+]
 
-class Cubie:
-    def __init__(self, position, colors):
-      
-        self.position = np.array(position, dtype=np.float32)
-        self.colors = colors
-
-    def draw(self):
-        glPushMatrix()
-        glTranslatef(*self.position)
-        draw_unit_cube(self.colors)
-        glPopMatrix()
+#surfaces for rendering
+surfaces = [
+    (0, 1, 2, 3),  #back
+    (4, 5, 6, 7),  #front
+    (0, 4, 7, 3),  #left
+    (1, 5, 6, 2),  #right
+    (3, 7, 6, 2),  #top
+    (0, 4, 5, 1)   #bottom
+]
 
 
-class RubiksCube:
-    def __init__(self):
-    
-        self.cubies = []
-        # Solved state
-        default_colors = {
-            'F': (1, 0, 0),
-            'B': (1, 0.5, 0),
-            'L': (0, 1, 0),
-            'R': (0, 0, 1),
-            'U': (1, 1, 1),
-            'D': (1, 1, 0)
-        }
-        # centre cords 
-        positions = [-2, 0, 2]
-        for x in positions:
-            for y in positions:
-                for z in positions:
-                    # if the cubie is on the exterior use the appropriate color.
-                    # Otherwise use gray for hidden faces.
-                    colors = []
-                    colors.append(default_colors['B'] if z == -2 else (0.5, 0.5, 0.5))  # Back
-                    colors.append(default_colors['F'] if z == 2 else (0.5, 0.5, 0.5))   # Front
-                    colors.append(default_colors['L'] if x == -2 else (0.5, 0.5, 0.5))  # Left
-                    colors.append(default_colors['R'] if x == 2 else (0.5, 0.5, 0.5))   # Right
-                    colors.append(default_colors['U'] if y == 2 else (0.5, 0.5, 0.5))   # Up
-                    colors.append(default_colors['D'] if y == -2 else (0.5, 0.5, 0.5))  # Down
-                    self.cubies.append(Cubie((x, y, z), colors))
+# --- THE COORDINATE SYSTEM ---
+# We create a list to store the X, Y, Z and Rotation for every cube.
+# Format: [x, y, z, rot_y, rot_x, rot_z]
+cube_system = []
+for x in range(-1, 2):
+    for y in range(-1, 2):
+        for z in range(-1, 2):
+            cube_system.append([x, y, z, 0, 0, 0])
 
-    def draw(self):
-        for cubie in self.cubies:
-            cubie.draw()
+def draw_cube(bottom_rotation, top_rotation, middle_rotation, bottom_side_rotation, middle_side_rotation,top_side_rotation):
+    #Distance between cubes 
+    spacing = 2.1 
 
-    def rotate_face(self, face, angle):
-    
-        tol = 0.1  # Tolerance for floating point 
-        if face == 'F':  # Front face
-            axis = (0, 0, 1)
-            for cubie in self.cubies:
-                if abs(cubie.position[2] - 2) < tol:
-                    cubie.position = rotate_vector(cubie.position, axis, angle)
-        elif face == 'B':  # Back 
-            axis = (0, 0, 1)
-            for cubie in self.cubies:
-                if abs(cubie.position[2] + 2) < tol:
-                    cubie.position = rotate_vector(cubie.position, axis, -angle)
-        elif face == 'L':  # Left 
-            axis = (1, 0, 0)
-            for cubie in self.cubies:
-                if abs(cubie.position[0] + 2) < tol:
-                    cubie.position = rotate_vector(cubie.position, axis, angle)
-        elif face == 'R':  # Right 
-            axis = (1, 0, 0)
-            for cubie in self.cubies:
-                if abs(cubie.position[0] - 2) < tol:
-                    cubie.position = rotate_vector(cubie.position, axis, -angle)
-        elif face == 'U':  # Up 
-            axis = (0, 1, 0)
-            for cubie in self.cubies:
-                if abs(cubie.position[1] - 2) < tol:
-                    cubie.position = rotate_vector(cubie.position, axis, angle)
-        elif face == 'D':  # Down 
-            axis = (0, 1, 0)
-            for cubie in self.cubies:
-                if abs(cubie.position[1] + 2) < tol:
-                    cubie.position = rotate_vector(cubie.position, axis, -angle)
+    #Loop through X (Left/Right), Y (Up/Down), and Z (Front/Back)
+    for x in range(-1, 2):      
+        for y in range(-1, 2):  
+            for z in range(-1, 2): 
 
-def rotate_vector(vec, axis, angle):
-  
-    angle_rad = math.radians(angle)
-    cos_a = math.cos(angle_rad)
-    sin_a = math.sin(angle_rad)
-    ax, ay, az = axis
-    # Normalize axis
-    norm = math.sqrt(ax*ax + ay*ay + az*az)
-    ax, ay, az = ax/norm, ay/norm, az/norm
-    x, y, z = vec
-    rx = (cos_a + (1-cos_a)*ax*ax)*x + ((1-cos_a)*ax*ay - sin_a*az)*y + ((1-cos_a)*ax*az + sin_a*ay)*z
-    ry = ((1-cos_a)*ay*ax + sin_a*az)*x + (cos_a + (1-cos_a)*ay*ay)*y + ((1-cos_a)*ay*az - sin_a*ax)*z
-    rz = ((1-cos_a)*az*ax - sin_a*ay)*x + ((1-cos_a)*az*ay + sin_a*ax)*y + (cos_a + (1-cos_a)*az*az)*z
-    return np.array([rx, ry, rz], dtype=np.float32)
+                glPushMatrix() #Save current position 
+
+                
+                if y == 1:
+                    glRotatef(top_rotation, 0, 1, 0)
+                if y == 0:
+                    glRotatef(middle_rotation, 0, 1, 0)
+                if y == -1:
+                    glRotatef(bottom_rotation, 0, 1, 0)
+
+                if x == 1:
+                    glRotatef(top_side_rotation, 1, 0, 0)
+                if x == 0:
+                    glRotatef(middle_side_rotation, 1, 0, 0)
+                if x == -1:
+                    glRotatef(bottom_side_rotation, 1, 0, 0)
+
+
+
+                
+                #Move to the specific grid slot for this cube
+                glTranslatef(x * spacing, y * spacing, z * spacing)
+
+                #Draw Faces
+                glBegin(GL_QUADS)
+                for i, face in enumerate(surfaces):
+                    glColor3fv(cube_colors[i])  #set color for each face
+                    for vertex in face:
+                        glVertex3fv(vertices[vertex])
+                glEnd()
+
+                #OUtlines for the cube
+                glLineWidth(5) 
+                glBegin(GL_LINES)
+                glColor3f(0, 0, 0)  #black
+                for edge in edges:
+                    for vertex in edge:
+                        glVertex3fv(vertices[vertex])
+                glEnd()
+
+                glPopMatrix() #Reset position for the next cube
 
 def main():
     pygame.init()
     display = (800, 600)
-    pygame.display.set_mode(display, DOUBLEBUF | pygame.OPENGL)
-    glEnable(GL_DEPTH_TEST)
-    gluPerspective(45, (display[0] / display[1]), 0.1, 100.0)
-    glTranslatef(0.0, 0.0, -20)
+    pygame.display.set_mode(display, DOUBLEBUF | OPENGL)
 
-    cube = RubiksCube()
+    #these are the variables for the roation in the same function
+    bottom_rotation = 0 
+    top_rotation = 0 
+    middle_rotation = 0 
+    top_side_rotation = 0
+    middle_side_rotation = 0
+    bottom_side_rotation = 0
+
+    #enable depth testing so front cubes block back cubes
+    glEnable(GL_DEPTH_TEST)
+    
+    #set perspective
+    gluPerspective(45, (display[0] / display[1]), 0.1, 100.0)
+    
+    #Zoom out code is here
+
+    #Changed from -5 to -20 to fit the larger 3x3x3 cube
+    glTranslatef(0.0, 0.0, -20) 
+    
+    #Rotate slightly so we see it's 3D immediately
+    glRotatef(30, 1, 1, 0)
+
+    #main loop
+    running = True
     rotation_x, rotation_y = 0, 0
     mouse_down = False
-    running = True
 
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
 
+            #physical mouse button 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_down = True
             if event.type == pygame.MOUSEBUTTONUP:
                 mouse_down = False
 
+            #physical mouse movement
             if event.type == pygame.MOUSEMOTION and mouse_down:
                 dx, dy = event.rel
-                rotation_x += dy * Config.sensitivity
+                rotation_x += dy * Config.sensitivity  
                 rotation_y += dx * Config.sensitivity
 
+            #physical keyboard input
             if event.type == pygame.KEYDOWN:
-                # Use keys F, B, L, R, U, D to rotate faces clockwise.
-                if event.key == pygame.K_f:
-                    cube.rotate_face('F', 90)
-                if event.key == pygame.K_b:
-                    cube.rotate_face('B', 90)
-                if event.key == pygame.K_l:
-                    cube.rotate_face('L', 90)
-                if event.key == pygame.K_r:
-                    cube.rotate_face('R', 90)
-                if event.key == pygame.K_u:
-                    cube.rotate_face('U', 90)
-                if event.key == pygame.K_d:
-                    cube.rotate_face('D', 90)
+                if event.key == pygame.K_LEFT:
+                    rotation_y -= 5
+                if event.key == pygame.K_RIGHT:
+                    rotation_y += 5
+                if event.key == pygame.K_UP:
+                    rotation_x -= 5
+                if event.key == pygame.K_DOWN:
+                    rotation_x += 5
+
+            #rubix cube z controls
+            if event.type == pygame.KEYDOWN:
+                #camera
+                if event.key == pygame.K_LEFT: rotation_y -= 5
+                if event.key == pygame.K_RIGHT: rotation_y += 5
+                if event.key == pygame.K_UP: rotation_x -= 5
+                if event.key == pygame.K_DOWN: rotation_x += 5
+
+            if event.type ==pygame.KEYDOWN:
+                
+                if event.key == pygame.K_KP9:
+                    top_rotation += 45              #change this to change the movement speed
+
+                if event.key == pygame.K_KP7:
+                    top_rotation -= 45              #change this to change the movement speed
+                    
+
+                if event.key == pygame.K_KP6:
+                    middle_rotation -= -45          #change this to change the movement speed
+                    
+
+                if event.key == pygame.K_KP4:
+                    middle_rotation -= 45           #change this to change the movement speed
+                   
+
+                if event.key == pygame.K_KP1:
+                    bottom_rotation -= 45           #change this to change the movement speed
+                    
+
+                if event.key == pygame.K_KP3:
+                    bottom_rotation -= -45          #change this to change the movement speed
+                    
+
+                if event.key == pygame.K_KP8:
+                    middle_side_rotation += -45      #change this to change the movement speed
+                    
+
+                if event.key == pygame.K_KP2:
+                    middle_side_rotation += 45      #change this to change the movement speed
+
+
+
+                    
+
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+
+        #rotation
         glPushMatrix()
         glRotatef(rotation_x, 1, 0, 0)
         glRotatef(rotation_y, 0, 1, 0)
-        cube.draw()
+
+        draw_cube(bottom_rotation, top_rotation, middle_rotation, bottom_side_rotation, middle_side_rotation,top_side_rotation) #draws the cube with the roations in it
+
         glPopMatrix()
+
         pygame.display.flip()
         pygame.time.wait(10)
 
@@ -197,4 +234,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
